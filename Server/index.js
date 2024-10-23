@@ -1,5 +1,4 @@
 const express = require("express");
-const { STATUS_CODES } = require("http");
 const cron = require("node-cron");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
@@ -14,7 +13,6 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASSWORD
     }
 })
-
 const PORT = process.env.PORT || 3000;
 cron.schedule(process.env.CRON_FREQUENCY, () => {
     const people = [
@@ -66,5 +64,3 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
     console.log(`Listening on port: ${PORT}`)
 })
-
-module.exports = app;
