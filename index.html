@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="shortcut icon" href="./144.png" type="image/x-icon">
+    <title>Security Access</title>
+    <style>
+        *{
+            box-sizing: border-box;
+            padding: 0px;
+            margin: 0px;
+        }
+
+        html{
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body{
+            display: flex;
+            height: 100dvh;
+            width: 100dvw;
+            align-items: center;
+            justify-content: center;
+            background-color: rgb(243 244 246);
+        }
+
+        form{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            border: solid rgb(229, 230, 231) 1px;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            gap: 2rem;
+            width: 100%;
+            max-width: 28rem;
+            div{
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+                font-weight: 500;
+                width: 100%;
+            }
+        }
+
+        input{
+            height: 2.75rem;
+            width: 100%;
+            font-size: 0.95rem;
+            border: solid rgb(229, 230, 231) 1px;
+            border-radius: 0.5rem;
+            text-indent: 1rem;
+        }
+
+        button{
+            height: 2.75rem;
+            width: 100%;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            color: whitesmoke;
+            background-color: black;
+        }
+
+        .logo{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #status{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem;
+            font-weight: 600;
+            visibility: hidden;
+            min-width: 300px;
+            height: 75px;
+            margin: 2rem;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 0.75rem;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 30px;
+            top: 0.75rem;
+        }
+
+        #status.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 6.65s;
+            animation: fadein 0.5s, fadeout 0.5s 6.65s;
+        }
+        @-webkit-keyframes fadein {
+        from {left: -500px; opacity: 0;} 
+        to {left: 30px; opacity: 1;}
+        }
+
+        @keyframes fadein {
+        from {left: -500px; opacity: 0;}
+        to {left: 30px; opacity: 1;}
+        }
+
+        @-webkit-keyframes fadeout {
+        from {left: 30px; opacity: 1;} 
+        to {left: -500px; opacity: 0;}
+        }
+
+        @keyframes fadeout {
+        from {left: 30px; opacity: 1;}
+        to {left: -500px; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+    <form id="form">
+        <div class="logo">
+            <img src="./security-safe-svgrepo-com.svg" alt="Security Access Logo" width="64px" height="64px">
+            <h2>Security Access</h2>
+        </div>
+        <div>
+            <label for="encryptedCode">Passkey</label>
+            <input required type="text" id="encryptedCode" placeholder="Enter passkey Code">
+        </div>
+        <div>
+            <label for="flatInput">Flat ID</label>
+            <input required type="text" id="flatInput" placeholder="Enter Flat ID">
+        </div>
+        <button id="button">Decrypt</button>
+    </form>
+    <div id="status"></div>
+    <script>
+        // if('serviceWorker' in navigator){
+        //     navigator.serviceWorker.register('./service-worker.js')
+        //     .then(registration => {
+        //         console.log("Service Worked Registered", registration)
+        //     }).catch((error) => {
+        //         console.log("An Error Occurred")
+        //     })
+        // }
+        function extractDateAndId(key){
+            const passkey = unshuffleString(key);
+            const passkeyArray = [];
+            for (let i = 0; i < key.length; i++) {
+                passkeyArray.push(String.fromCharCode((passkey.charCodeAt(i) - 2)))
+            }
+            const data = passkeyArray.join("")
+            return { year: data.slice(0, 4), month: data.slice(4, 6), day: data.slice(6, 8), flatId: data.slice(8, passkeyArray.length) }
+        }
+
+        function unshuffleString(shuffledStr) 
+        {
+            const length = shuffledStr.length;
+            const indices = Array.from({ length }, (_, i) => i);
+            for (let i = 0; i < length; i++) {
+                const newIndex = (i + 2) % length;
+                [indices[i], indices[newIndex]] = [indices[newIndex], indices[i]];
+            }
+            const unshuffled = new Array(length);
+            for (let i = 0; i < length; i++) {
+                unshuffled[indices[i]] = shuffledStr[i];
+            }
+            return unshuffled.join('');
+        }
+
+        const form = document.getElementById('form');
+        const encryptedCodeInput = document.getElementById("encryptedCode");
+        const flatInput = document.getElementById("flatInput");
+        const status = document.getElementById("status")
+
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            status.classList.remove("show")
+            if (encryptedCodeInput.value) {
+                try {
+                    const date = new Date().toISOString(1).slice(0, 10).replaceAll("-", "");
+                    const {year, day, month, flatId} = extractDateAndId(encryptedCodeInput.value);
+                    if (date === `${year}${month}${day}` && flatInput.value === flatId){
+                        status.innerText = "Valid Passkey and Flat ID"
+                        status.style.backgroundColor = "green"
+                    }
+                    else{
+                        status.innerText = "Invalid PassKey and Flat ID"
+                        status.style.backgroundColor = "red"
+                    }
+
+                    status.classList.add("show")
+                    setTimeout(() => { status.classList.remove("show") }, 7000);
+                    encryptedCodeInput.value = "";
+                    flatInput.value = "";
+                } catch (error) {
+                    console.error("Decryption failed:", error);
+                }
+            } else {
+                console.log("Please provide both IV and Encrypted Code.");
+            }
+        });
+    </script>
+</body>
+
+</html>
