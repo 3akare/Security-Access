@@ -1,12 +1,14 @@
 const express = require("express");
+const { STATUS_CODES } = require("http");
 const cron = require("node-cron");
 const nodemailer = require("nodemailer");
+require("dotenv").config();
 
 const app = express();
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
+    port: 465,
+    secure: true,
     auth: {
         user: "bakaredavid007@gmail.com",
         pass: process.env.EMAIL_PASSWORD
@@ -19,18 +21,17 @@ cron.schedule(process.env.CRON_FREQUENCY, () => {
         { email: "bakaredavid007@gmail.com", flatId: "90" },
     ]
     people.forEach((person) => {
-        console.log(generatePassKey(person.flatId))
         transporter.sendMail(
             {
-                from: "bakaredavid007@gmail",
+                from: "bakaredavid007@gmail.com",
                 to: person.email,
-                subject: "Daily Code",
-                text: `The Estate code for today [${new Date().getDate()}] is: ${generatePassKey(person.flatId)}`
+                subject: `Security Invitation Code ${new Date().getDay()}/${new Date().getMonth()}/${new Date().getFullYear()}`,
+                text: `Passkey: ${generatePassKey(person.flatId)}\nFlat ID: ${person.flatId}`
             }, (error) => {
                 if (error) {
                     console.log(error.message);
                 }
-                else{
+                else {
                     console.log("Email sent to: " + person.email);
                 }
             })
@@ -58,9 +59,10 @@ function shuffleString(str) {
     return indices.map(index => str[index]).join('');
 }
 
-for (let i = 0; i < 91; i++){
-    console.log(generatePassKey(i + ""));
-}
+app.get("/", (req, res) => {
+    res.json({ status: "UP", statusCode: 200 })
+})
+
 app.listen(PORT, () => {
     console.log(`Listening on port: ${PORT}`)
 })
