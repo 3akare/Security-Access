@@ -25,7 +25,7 @@ cron.schedule(process.env.CRON_FREQUENCY, () => {
             {
                 from: "bakaredavid007@gmail.com",
                 to: person.email,
-                subject: `Security Invitation Code ${new Date().getDay()}/${new Date().getMonth()}/${new Date().getFullYear()}`,
+                subject: `Security Invitation Code ${new Date().toISOString(1).slice(0,10)}`,
                 text: `Passkey: ${generatePassKey(person.flatId)}\nFlat ID: ${person.flatId}`
             }, (error) => {
                 if (error) {
