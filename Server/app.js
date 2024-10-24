@@ -58,7 +58,7 @@ function shuffleString(str) {
 }
 
 app.get("/", (req, res) => {
-    res.json({ status: "UP", statusCode: 200 })
+    res.json({ status: "UP", statusCode: generatePassKey(89) })
 })
 
 app.listen(PORT, () => {
